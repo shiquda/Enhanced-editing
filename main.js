@@ -2042,11 +2042,13 @@ class MyPlugin extends obsidian.Plugin {
 
         for (const oldStr of fileNameAry) {
             if (oldStr.length < 2) { continue } //不处理单字名称
-            let xinStr = oldStr.replace(/([^⚘])/g, "$1⚘");  //⚘
+            let xinStr = oldStr.replace(/([^⚘])/g, "\$1⚘");  //⚘
             //将当前笔记中的潜在链接转为内部链接，如果有重复内容，只转换第一次出现的文本
             // let 笔记新文 = 笔记正文.replace(oldStr, "[[" + xinStr + "]]");
             //如果有重复内容，转换所有出现的文本
-            let 笔记新文 = 笔记正文.replace(new RegExp(oldStr.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'), 'g'), "[[" + xinStr + "]]");
+            let 笔记新文 = 笔记正文.replace(new RegExp(`(^|[^\\[\\w])${oldStr.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&')}($|[^\\]\\w])`, 'g'), function (match, p1, p2) {
+                return p1 + "[[" + xinStr + "]]" + p2;
+            });
 
             if (笔记新文 != 笔记正文) {
                 笔记正文 = 笔记新文;
@@ -2054,6 +2056,8 @@ class MyPlugin extends obsidian.Plugin {
                 转换链接内容.push(oldStr);
             }
         };
+
+
 
         if (累计 < 1) {
             new obsidian.Notice("📣 未发现潜在链接！")
